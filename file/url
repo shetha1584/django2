@@ -1,0 +1,82 @@
+urls.py
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('translation/success/', views.translation_success, name='translation_success'),
+]
+
+views.py
+
+
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from .forms import TranslationForm, TextInputForm, YouTubeURLForm
+from googletrans import Translator  # Use Google Translate API to perform translation
+
+def home(request):
+    if request.method == 'POST':
+        form = TranslationForm(request.POST)
+        if form.is_valid():
+            translation = form.save(commit=False)
+
+            if translation.content_type == 'text':
+                input_text_form = TextInputForm(request.POST)
+                if input_text_form.is_valid():
+                    input_text = input_text_form.cleaned_data['input_text']
+                    translator = Translator()
+                    translation.translated_content = translator.translate(
+                        input_text,
+                        src=translation.source_language,
+                        dest=translation.destination_language
+                    ).text
+            elif translation.content_type == 'youtube':
+                youtube_form = YouTubeURLForm(request.POST)
+                if youtube_form.is_valid():
+                    youtube_url = youtube_form.cleaned_data['youtube_url']
+                
+
+            translation.save()
+            return redirect('translation_success')
+    else:
+        form = TranslationForm()
+
+    context = {'form': form}
+    return render(request, 'home.html', context)
+
+def translation_success(request):
+    return HttpResponse("Translation successful!")
+
+    input_text.html
+
+    <div>
+  <label for="chose the file to upload">Input Text:</label>
+  {{ input_text_form.input_text }}
+</div>
+
+<div class="pdf-input-box">
+  <label for="pdf-input">PDF Document:</label>
+  <input type="file" id="pdf-input" name="pdf_input">
+</div>
+
+<div class="download-button">
+  <a href="#" class="btn btn-primary">Download</a>
+</div>
+
+youtube_url.html
+
+<div>
+  <label for="provide link">YouTube URL:</label>
+  {{ youtube_form.youtube_url }}
+</div>
+
+<div class="youtube-download-box">
+  <label for="youtube-url">YouTube URL:</label>
+  <input type="text" id="youtube-url" name="youtube_url" class="form-control">
+</div>
+
+<div class="download-button">
+  <a href="#" class="btn btn-primary">Download</a>
+</div>
