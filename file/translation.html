@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translation Success</title>
+</head>
+<body>
+    <h1>Translation Successful!</h1>
+    <div>
+        <h3>Translated Text:</h3>
+        <textarea rows="20" cols="100">{{ translated_text }}</textarea>
+    </div>
+    <br>
+    <a href="{% url 'download_translation' %}" class="btn btn-primary">Download Translated Text</a>
+</body>
+</html>
